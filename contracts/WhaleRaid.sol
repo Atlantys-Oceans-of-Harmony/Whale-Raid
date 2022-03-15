@@ -109,6 +109,10 @@ contract Raid is Ownable{
         whaleInfo[lastToken].userPosition = currPosition;
     }
 
+    function getUserStaked(address _user) external view returns(uint[] memory){
+        return userStaked[_user];
+    }
+
     function vrf() private view returns (bytes32 result) {
         uint256[1] memory bn;
         bn[0] = block.number;
