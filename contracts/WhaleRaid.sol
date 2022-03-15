@@ -16,6 +16,7 @@ contract Raid is Ownable{
         uint timeStaked;
         uint prizeMultiplier;
         uint position;
+        uint userPosition;
     }
 
     uint[] public stakedWhales;
@@ -26,6 +27,7 @@ contract Raid is Ownable{
     uint public lockPeriod = 24 hours;
 
     mapping(uint=>stakeWhales) public whaleInfo;
+    mapping(address=>uint[]) public userStaked;
 
     constructor(address _whale,address _arb){
         Whale = IERC721(_whale);
@@ -38,10 +40,12 @@ contract Raid is Ownable{
         ARB.transferFrom(msg.sender,address(this),entryFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
         uint random = uint(vrf());
+        userStaked[msg.sender].push(tokenId);
         if(stakedWhales.length == 0){
             //Auto win if no opponents exist
-            whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,1,stakedWhales.length);
+            whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,1,stakedWhales.length,userStaked[msg.sender].length);
             stakedWhales.push(tokenId);
+            userStaked[msg.sender].push(tokenId);
         }
         else{
             uint opponent = stakedWhales[random % stakedWhales.length];
@@ -49,8 +53,9 @@ contract Raid is Ownable{
             if(random%100 < 50){
                 //opponent wins
                 whaleInfo[opponent].prizeMultiplier += 1;
-                whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,0,deadWhales.length);
+                whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,0,deadWhales.length,userStaked[msg.sender].length);
                 deadWhales.push(tokenId);
+                userStaked[msg.sender].push(tokenId);
             }
             else{
                 //user wins
@@ -60,11 +65,11 @@ contract Raid is Ownable{
                     whaleInfo[opponent].position = deadWhales.length - 1;
                 }
                 whaleInfo[opponent].prizeMultiplier -= 1;
-                whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,2,stakedWhales.length);
+                whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,2,stakedWhales.length,userStaked[msg.sender].length);
                 stakedWhales.push(tokenId);
+                userStaked[msg.sender].push(tokenId);
             }
         }
-        
     }
 
     function returnRaid(uint[] memory tokenId) external {
@@ -76,6 +81,7 @@ contract Raid is Ownable{
             amount += basePrize*currWhale.prizeMultiplier;
             popToken(tokenId[i]);
             Whale.transferFrom(address(this),msg.sender,tokenId[i]);
+            popUser(tokenId[i]);
             delete whaleInfo[tokenId[i]];
         }
         ARB.transfer(msg.sender,amount);
@@ -96,7 +102,14 @@ contract Raid is Ownable{
         }
     }
 
-     function vrf() private view returns (bytes32 result) {
+    function popUser(uint tokenId) private {
+        uint currPosition = whaleInfo[tokenId].userPosition;
+        uint lastToken = userStaked[msg.sender][userStaked[msg.sender].length-1];
+        userStaked[msg.sender][currPosition] = userStaked[msg.sender][userStaked[msg.sender].length-1];
+        whaleInfo[lastToken].userPosition = currPosition;
+    }
+
+    function vrf() private view returns (bytes32 result) {
         uint256[1] memory bn;
         bn[0] = block.number;
         assembly {
