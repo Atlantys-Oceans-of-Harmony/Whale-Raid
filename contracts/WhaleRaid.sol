@@ -41,6 +41,7 @@ contract Raid is Ownable{
         if(stakedWhales.length == 0){
             //Auto win if no opponents exist
             whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,1,stakedWhales.length);
+            stakedWhales.push(tokenId);
         }
         else{
             uint opponent = stakedWhales[random % stakedWhales.length];
@@ -60,6 +61,7 @@ contract Raid is Ownable{
                 }
                 whaleInfo[opponent].prizeMultiplier -= 1;
                 whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,2,stakedWhales.length);
+                stakedWhales.push(tokenId);
             }
         }
         
