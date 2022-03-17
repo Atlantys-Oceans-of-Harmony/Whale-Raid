@@ -40,7 +40,6 @@ contract Raid is Ownable{
         ARB.transferFrom(msg.sender,address(this),entryFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
         uint random = uint(vrf());
-        userStaked[msg.sender].push(tokenId);
         if(stakedWhales.length == 0){
             //Auto win if no opponents exist
             whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,1,stakedWhales.length,userStaked[msg.sender].length);
