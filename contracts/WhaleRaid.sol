@@ -28,10 +28,19 @@ contract Raid is Ownable{
 
     mapping(uint=>stakeWhales) public whaleInfo;
     mapping(address=>uint[]) public userStaked;
+    mapping(uint=>uint[3]) public landStats; //Resource,Attack,Defense
 
     constructor(address _whale,address _arb){
         Whale = IERC721(_whale);
         ARB = IERC20(_arb);
+    }
+
+    function initializeLand(uint[] memory tokenId,uint[][3] memory stats) external {
+        for(uint i=0;i<tokenId.length;i++){
+            for(uint j=0;j<3;j++){
+                landStats[tokenId[i]][j] = stats[i][j];
+            }
+        }
     }
 
     function sendRaid(uint tokenId) external {
