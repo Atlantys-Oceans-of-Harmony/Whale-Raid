@@ -5,14 +5,17 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./LandSigner.sol";
 
-contract Raid is Ownable{
+contract Raid is Ownable,PlotSigner{
 
     IERC721 Whale;
+    IERC721 Land;
     IERC20 ARB;
 
     struct stakeWhales{
         address owner;
+        uint land;
         uint timeStaked;
         uint prizeMultiplier;
         uint position;
@@ -29,29 +32,39 @@ contract Raid is Ownable{
     mapping(uint=>stakeWhales) public whaleInfo;
     mapping(address=>uint[]) public userStaked;
     mapping(uint=>uint[3]) public landStats; //Resource,Attack,Defense
+    mapping(uint=>bool) public landInitialized;
 
-    constructor(address _whale,address _arb){
+    address designatedSigner;
+
+    constructor(address _whale,address _arb,address _land){
         Whale = IERC721(_whale);
         ARB = IERC20(_arb);
+        Land = IERC721(_land);
     }
 
-    function initializeLand(uint[] memory tokenId,uint[][3] memory stats) external {
+    function initializeLand(uint[] memory tokenId,uint[][3] memory stats,bytes[] memory sigantures) external {
         for(uint i=0;i<tokenId.length;i++){
+            require(getSigner(PlotInfo(tokenId[i],stats[i][0],stats[i][1],stats[i][2],sigantures[i]))==designatedSigner,"Invalid signer");
             for(uint j=0;j<3;j++){
                 landStats[tokenId[i]][j] = stats[i][j];
+                landInitialized[tokenId[i]] = true;
             }
         }
     }
 
-    function sendRaid(uint tokenId) external {
+    function sendRaid(uint tokenId,uint land) external {
         require(Whale.ownerOf(tokenId)==msg.sender,"Not owner");
         require(msg.sender == tx.origin,"contract can't call function");
         ARB.transferFrom(msg.sender,address(this),entryFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
+        if(land !=0){
+            Land.transferFrom(msg.sender,address(this),land);
+            require(landInitialized[tokenId],"Land not initialized");
+        }
         uint random = uint(vrf());
         if(stakedWhales.length == 0){
             //Auto win if no opponents exist
-            whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,1,stakedWhales.length,userStaked[msg.sender].length);
+            whaleInfo[tokenId] = stakeWhales(msg.sender,land,block.timestamp,1,stakedWhales.length,userStaked[msg.sender].length);
             stakedWhales.push(tokenId);
             userStaked[msg.sender].push(tokenId);
         }
@@ -61,7 +74,7 @@ contract Raid is Ownable{
             if(random%100 < 50){
                 //opponent wins
                 whaleInfo[opponent].prizeMultiplier += 1;
-                whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,0,deadWhales.length,userStaked[msg.sender].length);
+                whaleInfo[tokenId] = stakeWhales(msg.sender,land,block.timestamp,0,deadWhales.length,userStaked[msg.sender].length);
                 deadWhales.push(tokenId);
                 userStaked[msg.sender].push(tokenId);
             }
@@ -73,7 +86,7 @@ contract Raid is Ownable{
                     whaleInfo[opponent].position = deadWhales.length - 1;
                 }
                 whaleInfo[opponent].prizeMultiplier -= 1;
-                whaleInfo[tokenId] = stakeWhales(msg.sender,block.timestamp,2,stakedWhales.length,userStaked[msg.sender].length);
+                whaleInfo[tokenId] = stakeWhales(msg.sender,land,block.timestamp,2,stakedWhales.length,userStaked[msg.sender].length);
                 stakedWhales.push(tokenId);
                 userStaked[msg.sender].push(tokenId);
             }
@@ -89,6 +102,9 @@ contract Raid is Ownable{
             amount += basePrize*currWhale.prizeMultiplier;
             popToken(tokenId[i]);
             Whale.transferFrom(address(this),msg.sender,tokenId[i]);
+            if(currWhale.land != 0){
+                Land.transferFrom(address(this),msg.sender,currWhale.land);
+            }
             popUser(tokenId[i]);
             delete whaleInfo[tokenId[i]];
         }
