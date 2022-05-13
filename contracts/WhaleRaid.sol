@@ -60,11 +60,12 @@ contract Raid is Ownable,PlotSigner{
 
     function sendRaid(uint tokenId,uint land) external {
         require(msg.sender == tx.origin,"contract can't call function");
-        require(Whale.ownerOf(tokenId)==msg.sender,"Not owner");
+        require(Whale.ownerOf(tokenId)==msg.sender,"Not whale owner");
         AQUA.transferFrom(msg.sender,address(this),entryFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
         if(land !=0){
             require(landInitialized[tokenId],"Land not initialized");
+            require(Land.ownerOf(land)==msg.sender,"Not land owner");
             Land.transferFrom(msg.sender,address(this),land);
         }
         uint random = uint(vrf());
@@ -124,8 +125,9 @@ contract Raid is Ownable,PlotSigner{
                 Land.transferFrom(address(this),msg.sender,currWhale.land);
             }
             popUser(tokenId[i]);
+            uint bonus = landStats[whaleInfo[tokenId[i]].land][0]/10;
             delete whaleInfo[tokenId[i]];
-            if(random%100 < artifactOdds){
+            if(random%100 < artifactOdds+bonus){
                 emit ArtifactReceived(msg.sender, tokenId[i]);
             }
             random /= 10;
