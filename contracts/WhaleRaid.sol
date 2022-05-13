@@ -11,7 +11,8 @@ contract Raid is Ownable,PlotSigner{
 
     IERC721 Whale;
     IERC721 Land;
-    IERC20 ARB;
+    IERC721 Artifacts;
+    IERC20 AQUA;
 
     struct stakeWhales{
         address owner;
@@ -28,6 +29,8 @@ contract Raid is Ownable,PlotSigner{
     uint public basePrize = 25 ether;
     uint public entryFees = 25 ether;
     uint public lockPeriod = 24 hours;
+    uint public artifactOdds = 20;
+
 
     mapping(uint=>stakeWhales) public whaleInfo;
     mapping(address=>uint[]) public userStaked;
@@ -36,10 +39,13 @@ contract Raid is Ownable,PlotSigner{
 
     address designatedSigner;
 
-    constructor(address _whale,address _arb,address _land){
+    event ArtifactReceived(address indexed user,uint indexed tokenId);
+
+    constructor(address _whale,address _arb,address _land,address _artifacts){
         Whale = IERC721(_whale);
-        ARB = IERC20(_arb);
+        AQUA = IERC20(_arb);
         Land = IERC721(_land);
+        Artifacts = IERC721(_artifacts);
     }
 
     function initializeLand(uint[] memory tokenId,uint[][3] memory stats,bytes[] memory sigantures) external {
@@ -53,13 +59,13 @@ contract Raid is Ownable,PlotSigner{
     }
 
     function sendRaid(uint tokenId,uint land) external {
-        require(Whale.ownerOf(tokenId)==msg.sender,"Not owner");
         require(msg.sender == tx.origin,"contract can't call function");
-        ARB.transferFrom(msg.sender,address(this),entryFees);
+        require(Whale.ownerOf(tokenId)==msg.sender,"Not owner");
+        AQUA.transferFrom(msg.sender,address(this),entryFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
         if(land !=0){
-            Land.transferFrom(msg.sender,address(this),land);
             require(landInitialized[tokenId],"Land not initialized");
+            Land.transferFrom(msg.sender,address(this),land);
         }
         uint random = uint(vrf());
         if(stakedWhales.length == 0){
@@ -71,7 +77,17 @@ contract Raid is Ownable,PlotSigner{
         else{
             uint opponent = stakedWhales[random % stakedWhales.length];
             random = random/10000;
-            if(random%100 < 50){
+            uint[3] memory userLand = landStats[land];
+            uint[3] memory opponentLand = landStats[whaleInfo[opponent].land];
+            uint odds;
+            
+            if (opponentLand[2] >= userLand[1]){ //Defense > Attack
+                odds = 50 + 25*(opponentLand[2] - userLand[1])/100;
+            }
+            else{
+                odds = 50 - 25*(userLand[1]-opponentLand[2])/100;
+            }
+            if(random%100 < odds){
                 //opponent wins
                 whaleInfo[opponent].prizeMultiplier += 1;
                 whaleInfo[tokenId] = stakeWhales(msg.sender,land,block.timestamp,0,deadWhales.length,userStaked[msg.sender].length);
@@ -94,7 +110,9 @@ contract Raid is Ownable,PlotSigner{
     }
 
     function returnRaid(uint[] memory tokenId) external {
+        require(tokenId.length < 60,"Can't return more than 60 raids");
         uint amount = 0;
+        uint random = uint(vrf());
         for(uint i=0;i<tokenId.length;i++){
             stakeWhales storage currWhale = whaleInfo[tokenId[i]];
             require(currWhale.owner == msg.sender,"Not owner");
@@ -107,8 +125,12 @@ contract Raid is Ownable,PlotSigner{
             }
             popUser(tokenId[i]);
             delete whaleInfo[tokenId[i]];
+            if(random%100 < artifactOdds){
+                emit ArtifactReceived(msg.sender, tokenId[i]);
+            }
+            random /= 10;
         }
-        ARB.transfer(msg.sender,amount);
+        AQUA.transfer(msg.sender,amount);
     }
 
     function popToken(uint tokenId) private {
@@ -150,8 +172,16 @@ contract Raid is Ownable,PlotSigner{
         return result;
     }
 
-    function withdrawARB() external onlyOwner{
-        ARB.transfer(msg.sender,ARB.balanceOf(address(this)));
+    function withdrawAqua() external onlyOwner{
+        AQUA.transfer(msg.sender,AQUA.balanceOf(address(this)));
+    }
+
+    function setArtifact(address _artifact) external onlyOwner{
+        Artifacts = IERC721(_artifact);
+    }
+
+    function setPlot(address _plot) external onlyOwner{
+        Land = IERC721(_plot);
     }
 
     function setPrice(uint _price) external onlyOwner{
@@ -170,8 +200,8 @@ contract Raid is Ownable,PlotSigner{
         Whale = IERC721(_whale);
     }
 
-    function setArb(address _arb) external onlyOwner{
-        ARB = IERC20(_arb);
+    function setAqua(address _arb) external onlyOwner{
+        AQUA = IERC20(_arb);
     }
 
 }
