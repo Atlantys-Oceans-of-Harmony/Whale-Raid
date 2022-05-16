@@ -7,11 +7,15 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./LandSigner.sol";
 
+interface Artifact is IERC721{
+    function mintArtifact(address _to,uint _amount) external;
+}
+
 contract Raid is Ownable,PlotSigner{
 
     IERC721 Whale;
     IERC721 Land;
-    IERC721 Artifacts;
+    Artifact Artifacts;
     IERC20 AQUA;
 
     struct stakeWhales{
@@ -45,7 +49,7 @@ contract Raid is Ownable,PlotSigner{
         Whale = IERC721(_whale);
         AQUA = IERC20(_arb);
         Land = IERC721(_land);
-        Artifacts = IERC721(_artifacts);
+        Artifacts = Artifact(_artifacts);
     }
 
     function initializeLand(uint[] memory tokenId,uint[][3] memory stats,bytes[] memory sigantures) external {
@@ -128,6 +132,7 @@ contract Raid is Ownable,PlotSigner{
             uint bonus = landStats[whaleInfo[tokenId[i]].land][0]/10;
             delete whaleInfo[tokenId[i]];
             if(random%100 < artifactOdds+bonus){
+                Artifacts.mintArtifact(msg.sender,1);
                 emit ArtifactReceived(msg.sender, tokenId[i]);
             }
             random /= 10;
