@@ -184,7 +184,7 @@ contract Raid is Ownable,PlotSigner{
     }
 
     function setArtifact(address _artifact) external onlyOwner{
-        Artifacts = IERC721(_artifact);
+        Artifacts = Artifact(_artifact);
     }
 
     function setPlot(address _plot) external onlyOwner{
