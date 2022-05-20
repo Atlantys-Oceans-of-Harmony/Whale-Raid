@@ -52,7 +52,7 @@ contract Raid is Ownable,PlotSigner{
         Artifacts = Artifact(_artifacts);
     }
 
-    function initializeLand(uint[] memory tokenId,uint[][3] memory stats,bytes[] memory sigantures) external {
+    function initializeLand(uint[] memory tokenId,uint[3][] memory stats,bytes[] memory sigantures) external {
         for(uint i=0;i<tokenId.length;i++){
             require(getSigner(PlotInfo(tokenId[i],stats[i][0],stats[i][1],stats[i][2],sigantures[i]))==designatedSigner,"Invalid signer");
             for(uint j=0;j<3;j++){
