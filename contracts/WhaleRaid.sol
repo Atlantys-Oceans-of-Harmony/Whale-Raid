@@ -41,7 +41,7 @@ contract Raid is Ownable,PlotSigner{
     mapping(uint=>uint[3]) public landStats; //Resource,Attack,Defense
     mapping(uint=>bool) public landInitialized;
 
-    address designatedSigner;
+    address designatedSigner = 0xE4B19B4ed9D68aDc37c8cEf0f7C2b7D4ADbf15A9;
 
     event ArtifactReceived(address indexed user,uint indexed tokenId);
 
@@ -54,11 +54,11 @@ contract Raid is Ownable,PlotSigner{
 
     function initializeLand(uint[] memory tokenId,uint[3][] memory stats,bytes[] memory sigantures) external {
         for(uint i=0;i<tokenId.length;i++){
-            require(getSigner(PlotInfo(tokenId[i],stats[i][0],stats[i][1],stats[i][2],sigantures[i]))==designatedSigner,"Invalid signer");
+            require(getSigner(PlotInfo(tokenId[i],stats[i][1],stats[i][2],stats[i][0],sigantures[i]))==designatedSigner,"Invalid signer");
             for(uint j=0;j<3;j++){
                 landStats[tokenId[i]][j] = stats[i][j];
-                landInitialized[tokenId[i]] = true;
             }
+            landInitialized[tokenId[i]] = true;
         }
     }
 
@@ -68,7 +68,7 @@ contract Raid is Ownable,PlotSigner{
         AQUA.transferFrom(msg.sender,address(this),entryFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
         if(land !=0){
-            require(landInitialized[tokenId],"Land not initialized");
+            require(landInitialized[land],"Land not initialized");
             require(Land.ownerOf(land)==msg.sender,"Not land owner");
             Land.transferFrom(msg.sender,address(this),land);
         }
@@ -130,11 +130,11 @@ contract Raid is Ownable,PlotSigner{
             }
             popUser(tokenId[i]);
             uint bonus = landStats[whaleInfo[tokenId[i]].land][0]/10;
-            delete whaleInfo[tokenId[i]];
-            if(random%100 < artifactOdds+bonus){
+            if(currWhale.prizeMultiplier != 0 && random%100 < artifactOdds+bonus){
                 Artifacts.mintArtifact(msg.sender,1);
                 emit ArtifactReceived(msg.sender, tokenId[i]);
             }
+            delete whaleInfo[tokenId[i]];
             random /= 10;
         }
         AQUA.transfer(msg.sender,amount);
