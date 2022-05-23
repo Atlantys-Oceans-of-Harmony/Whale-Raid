@@ -14,7 +14,7 @@ contract Artifacts is ERC721Enumerable,Ownable{
     string baseUri;
     string commonURI;
 
-    constructor() ERC721("Ocean Artiface","ART"){
+    constructor() ERC721("Ocean Artifact","ART"){
     }
 
     modifier onlyAllowed{

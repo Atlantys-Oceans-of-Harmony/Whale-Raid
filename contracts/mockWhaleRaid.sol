@@ -6,12 +6,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./LandSigner.sol";
+import "hardhat/console.sol";
 
 interface Artifact is IERC721{
     function mintArtifact(address _to,uint _amount) external;
 }
 
-contract Raid is Ownable,PlotSigner{
+contract testRaid is Ownable,PlotSigner{
 
     IERC721 Whale;
     IERC721 Land;
@@ -52,9 +53,8 @@ contract Raid is Ownable,PlotSigner{
         Artifacts = Artifact(_artifacts);
     }
 
-    function initializeLand(uint[] memory tokenId,uint[][3] memory stats,bytes[] memory sigantures) external {
+    function initializeLand(uint[] memory tokenId, uint[3][] memory stats) external {
         for(uint i=0;i<tokenId.length;i++){
-            require(getSigner(PlotInfo(tokenId[i],stats[i][0],stats[i][1],stats[i][2],sigantures[i]))==designatedSigner,"Invalid signer");
             for(uint j=0;j<3;j++){
                 landStats[tokenId[i]][j] = stats[i][j];
                 landInitialized[tokenId[i]] = true;
@@ -62,17 +62,18 @@ contract Raid is Ownable,PlotSigner{
         }
     }
 
-    function sendRaid(uint tokenId,uint land) external {
+    function sendRaid(uint tokenId, uint land) external {
         require(msg.sender == tx.origin,"contract can't call function");
         require(Whale.ownerOf(tokenId)==msg.sender,"Not whale owner");
         AQUA.transferFrom(msg.sender,address(this),entryFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
         if(land !=0){
-            require(landInitialized[tokenId],"Land not initialized");
+            require(landInitialized[land],"Land not initialized");
             require(Land.ownerOf(land)==msg.sender,"Not land owner");
             Land.transferFrom(msg.sender,address(this),land);
         }
-        uint random = uint(vrf());
+//        uint random = uint(vrf());
+        uint random = uint(keccak256(abi.encodePacked(block.timestamp)));
         if(stakedWhales.length == 0){
             //Auto win if no opponents exist
             whaleInfo[tokenId] = stakeWhales(msg.sender,land,block.timestamp,1,stakedWhales.length,userStaked[msg.sender].length);
@@ -85,13 +86,15 @@ contract Raid is Ownable,PlotSigner{
             uint[3] memory userLand = landStats[land];
             uint[3] memory opponentLand = landStats[whaleInfo[opponent].land];
             uint odds;
-            
+
             if (opponentLand[2] >= userLand[1]){ //Defense > Attack
                 odds = 50 + 25*(opponentLand[2] - userLand[1])/100;
             }
             else{
                 odds = 50 - 25*(userLand[1]-opponentLand[2])/100;
             }
+//            if(random%100 < odds){
+            random = 56;
             if(random%100 < odds){
                 //opponent wins
                 whaleInfo[opponent].prizeMultiplier += 1;
@@ -117,7 +120,8 @@ contract Raid is Ownable,PlotSigner{
     function returnRaid(uint[] memory tokenId) external {
         require(tokenId.length < 60,"Can't return more than 60 raids");
         uint amount = 0;
-        uint random = uint(vrf());
+//        uint random = uint(vrf());
+        uint random = 101;
         for(uint i=0;i<tokenId.length;i++){
             stakeWhales storage currWhale = whaleInfo[tokenId[i]];
             require(currWhale.owner == msg.sender,"Not owner");
@@ -164,19 +168,6 @@ contract Raid is Ownable,PlotSigner{
 
     function getUserStaked(address _user) external view returns(uint[] memory){
         return userStaked[_user];
-    }
-
-    function vrf() private view returns (bytes32 result) {
-        uint256[1] memory bn;
-        bn[0] = block.number;
-        assembly {
-            let memPtr := mload(0x40)
-            if iszero(staticcall(not(0), 0xff, bn, 0x20, memPtr, 0x20)) {
-                invalid()
-            }
-            result := mload(memPtr)
-        }
-        return result;
     }
 
     function withdrawAqua() external onlyOwner{

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="907e2943-d5da-4a58-b205-224e2f93d3c4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/contracts/testLand.sol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/contracts/whaleRaid.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/Artifacts.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/Artifacts.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/MockNFT.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/testWhale.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/MockToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/MockToken.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/WhaleRaid.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/mockWhaleRaid.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/sample-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/test/whaleRaid-test.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Solidity Contract" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="29KytERYYEcVb2QYQp1zxbReW6e" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/anikg/OneDrive/Desktop/Whale-Raid&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="907e2943-d5da-4a58-b205-224e2f93d3c4" name="Changes" comment="" />
+      <created>1652876283885</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1652876283885</updated>
+      <workItem from="1652876288283" duration="1191000" />
+      <workItem from="1652877721476" duration="1262000" />
+      <workItem from="1652879027155" duration="8440000" />
+      <workItem from="1652968585190" duration="48000" />
+      <workItem from="1653064764253" duration="491000" />
+      <workItem from="1653069222258" duration="1094000" />
+      <workItem from="1653112699201" duration="454000" />
+      <workItem from="1653206343247" duration="1580000" />
+      <workItem from="1653215183473" duration="2847000" />
+      <workItem from="1653292010390" duration="13997000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
