@@ -11,7 +11,7 @@ interface Artifact is IERC721{
     function mintArtifact(address _to,uint _amount) external;
 }
 
-contract Raid is Ownable,PlotSigner{
+contract WhaleRaid is Ownable,PlotSigner{
 
     IERC721 Whale;
     IERC721 Land;
@@ -160,6 +160,7 @@ contract Raid is Ownable,PlotSigner{
         uint lastToken = userStaked[msg.sender][userStaked[msg.sender].length-1];
         userStaked[msg.sender][currPosition] = userStaked[msg.sender][userStaked[msg.sender].length-1];
         whaleInfo[lastToken].userPosition = currPosition;
+        userStaked[msg.sender].pop();
     }
 
     function getUserStaked(address _user) external view returns(uint[] memory){
