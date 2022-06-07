@@ -43,7 +43,7 @@ contract WhaleRaid is Ownable,PlotSigner{
 
     address designatedSigner = 0xE4B19B4ed9D68aDc37c8cEf0f7C2b7D4ADbf15A9;
 
-    event ArtifactReceived(address indexed user,uint indexed tokenId);
+    event RaidResult(address indexed user,uint indexed tokenId,uint multiplier,bool artifactReceived);
 
     constructor(address _whale,address _arb,address _land,address _artifacts){
         Whale = IERC721(_whale);
@@ -132,7 +132,10 @@ contract WhaleRaid is Ownable,PlotSigner{
             uint bonus = landStats[whaleInfo[tokenId[i]].land][0]/10;
             if(currWhale.prizeMultiplier != 0 && random%100 < artifactOdds+bonus){
                 Artifacts.mintArtifact(msg.sender,1);
-                emit ArtifactReceived(msg.sender, tokenId[i]);
+                emit RaidResult(msg.sender, tokenId[i],currWhale.prizeMultiplier,true);
+            }
+            else{
+                emit RaidResult(msg.sender, tokenId[i],currWhale.prizeMultiplier,false);
             }
             delete whaleInfo[tokenId[i]];
             random /= 10;
