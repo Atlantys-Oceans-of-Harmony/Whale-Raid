@@ -30,11 +30,13 @@ contract WhaleRaid is Ownable,PlotSigner{
     uint[] public stakedWhales;
     uint[] public deadWhales;
 
-    uint public basePrize = 25 ether;
-    uint public entryFees = 25 ether;
+    uint public basePrize = 100 ether;
+    uint public entryFees = 100 ether;
+    uint public burnableFees = 5 ether;
     uint public lockPeriod = 24 hours;
-    uint public artifactOdds = 20;
+    uint public artifactOdds = 35;
 
+    address public burnAddress = 0x000000000000000000000000000000000000dEaD;
 
     mapping(uint=>stakeWhales) public whaleInfo;
     mapping(address=>uint[]) public userStaked;
@@ -65,7 +67,8 @@ contract WhaleRaid is Ownable,PlotSigner{
     function sendRaid(uint tokenId,uint land) external {
         require(msg.sender == tx.origin,"contract can't call function");
         require(Whale.ownerOf(tokenId)==msg.sender,"Not whale owner");
-        AQUA.transferFrom(msg.sender,address(this),entryFees);
+        AQUA.transferFrom(msg.sender,address(this),entryFees + burnableFees);
+        AQUA.transfer(burnAddress,burnableFees);
         Whale.transferFrom(msg.sender,address(this),tokenId);
         if(land !=0){
             require(landInitialized[land],"Land not initialized");
@@ -121,7 +124,7 @@ contract WhaleRaid is Ownable,PlotSigner{
         for(uint i=0;i<tokenId.length;i++){
             stakeWhales storage currWhale = whaleInfo[tokenId[i]];
             require(currWhale.owner == msg.sender,"Not owner");
-            require(block.timestamp - currWhale.timeStaked > lockPeriod,"Not unstaked yet");
+            require(block.timestamp - currWhale.timeStaked > lockPeriod || currWhale.prizeMultiplier == 0,"Not unstaked yet");
             amount += basePrize*currWhale.prizeMultiplier;
             popToken(tokenId[i]);
             Whale.transferFrom(address(this),msg.sender,tokenId[i]);
@@ -129,7 +132,7 @@ contract WhaleRaid is Ownable,PlotSigner{
                 Land.transferFrom(address(this),msg.sender,currWhale.land);
             }
             popUser(tokenId[i]);
-            uint bonus = landStats[whaleInfo[tokenId[i]].land][0]/10;
+            uint bonus = landStats[whaleInfo[tokenId[i]].land][0]/5;
             if(currWhale.prizeMultiplier != 0 && random%100 < artifactOdds+bonus){
                 Artifacts.mintArtifact(msg.sender,1);
                 emit RaidResult(msg.sender, tokenId[i],currWhale.prizeMultiplier,true);
@@ -201,6 +204,14 @@ contract WhaleRaid is Ownable,PlotSigner{
 
     function setPrize(uint _prize) external onlyOwner{
         basePrize = _prize;
+    }
+
+    function setBurnFees(uint _burn) external onlyOwner{
+        burnableFees = _burn;
+    }
+
+    function setArtifactOdds(uint _odds) external onlyOwner{
+        artifactOdds = _odds;
     }
 
     function setLockPeriod(uint _period) external onlyOwner{
