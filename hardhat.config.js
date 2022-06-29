@@ -21,10 +21,10 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
  module.exports = {
-  solidity: "0.8.12",
+  solidity: "0.8.10",
   networks:{
-    harmonytestnet:{
-      url:"https://api.s0.b.hmny.io",
+    harmonyDevnet:{
+      url:"https://api.s0.ps.hmny.io",
       accounts: [`${process.env.PRIVATE_KEY}`]
     }
   },

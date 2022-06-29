@@ -1,25 +1,37 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("WhaleRaid");
-  const greeter = await Greeter.deploy("0x8CC9176682521A38A04EAfd124932dE3aB246588","0xbd0c432B5F1d75b7A7BDf88D9F0ba815c64E758B","0x3232599EE4758Ff58C4db70F041A20668391670d","0xBa7cBAB48e8739b5F8377DA9AE264F23055924cD");
+    const Whale = await hre.ethers.getContractFactory("testWhale");
+    const whale = await Whale.deploy();
+    await whale.deployed();
 
-  await greeter.deployed();
+    console.log("Whale deployed to:", whale.address);
 
-  console.log("Raid deployed to:", greeter.address);
+    const Arb = await hre.ethers.getContractFactory("testAqua");
+    const arb = await Arb.deploy();
+    await arb.deployed();
+
+    console.log("Arb deployed to:", arb.address);
+
+    const Land = await hre.ethers.getContractFactory("testLand");
+    const land = await Land.deploy();
+    await land.deployed();
+
+    console.log("Land deployed to:", land.address);
+
+    const Artifacts = await hre.ethers.getContractFactory("Artifacts");
+    const artifacts = await Artifacts.deploy();
+    await artifacts.deployed();
+
+    console.log("artifacts deployed to:", artifacts.address);
+
+    const WhaleRaid = await hre.ethers.getContractFactory("WhaleRaid");
+    const raids = await WhaleRaid.deploy(whale.address, arb.address, land.address, artifacts.address);
+    await raids.deployed();
+
+    console.log("Whale Raid deployed to:", raids.address);
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
